@@ -1,47 +1,33 @@
-import React, { useContext } from 'react';
+import React from 'react';
+import { FiLogIn } from 'react-icons/fi';
+
 import { Link } from 'react-router-dom';
-import { FiLogIn, FiArchive } from 'react-icons/fi';
-import { ThemeContext } from 'styled-components';
-
 import logo from '../../assets/logo.svg';
-import logoDark from '../../assets/logo-dark.svg';
-
-import { Container, Content, Main } from './styles';
+import './styles.css';
 
 const Home: React.FC = () => {
-  const { title } = useContext(ThemeContext);
-
   return (
-    <Container>
-      <Content>
+    <div id="page-home">
+      <div className="content">
         <header>
-          {title === 'light' ? (
-            <img src={logo} alt="Ecoleta" />
-          ) : (
-            <img src={logoDark} alt="Ecoleta" />
-          )}
-          <Link to="/create-point">
-            <FiLogIn />
-            Cadastre um ponto de coleta
-          </Link>
+          <img src={logo} alt="Ecoleta" />
         </header>
 
-        <Main>
+        <main>
           <h1>Seu marketplace de coleta de resíduos.</h1>
-
           <p>
             Ajudamos pessoas a encontrarem pontos de coleta de forma eficiente.
           </p>
 
-          <Link to="/list-points">
+          <Link to="/create-point">
             <span>
-              <FiArchive />
+              <FiLogIn />
             </span>
-            <strong>Listar Pontos de coleta</strong>
+            <strong>Cadastre um ponto de coleta</strong>
           </Link>
-        </Main>
-      </Content>
-    </Container>
+        </main>
+      </div>
+    </div>
   );
 };
 

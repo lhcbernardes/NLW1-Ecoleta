@@ -1,20 +1,18 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
-import GlobalStyle from './styles/global';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
 
-import AppProvider from './hooks';
 import Routes from './routes';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <Router>
-      <AppProvider>
-        <GlobalStyle />
-        <Routes />
-      </AppProvider>
-    </Router>
+    <>
+      <Routes />
+      <ToastContainer autoClose={3000} />
+    </>
   );
-};
+}
 
 export default App;

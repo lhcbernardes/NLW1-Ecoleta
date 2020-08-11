@@ -1,23 +1,28 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from "react";
 import {
+  View,
+  Text,
+  StyleSheet,
   TouchableOpacity,
+  Image,
   SafeAreaView,
-  ActivityIndicator,
   Linking,
-} from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { Feather as Icon, FontAwesome } from '@expo/vector-icons';
-import * as MailComposer from 'expo-mail-composer';
+} from "react-native";
 
-import api from '../../services/api';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { Feather as Icon } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import { RectButton } from "react-native-gesture-handler";
 
-import * as S from './styles';
+import * as MailComposer from "expo-mail-composer";
 
-interface IParams {
-  point_id: string;
+import api from "../../services/api";
+
+interface Params {
+  point_id: number;
 }
 
-interface IData {
+interface Data {
   point: {
     image: string;
     image_url: string;
@@ -27,92 +32,160 @@ interface IData {
     city: string;
     uf: string;
   };
-  items: Array<{
+  items: {
     title: string;
-  }>;
+  }[];
 }
 
 const Detail: React.FC = () => {
-  const [data, setData] = useState<IData>({} as IData);
+  const [data, setData] = useState<Data>({} as Data);
   const navigation = useNavigation();
   const route = useRoute();
 
-  const { point_id } = route.params as IParams;
+  const routeParams = route.params as Params;
 
   useEffect(() => {
-    api.get<IData>(`points/${point_id}`).then(response => {
+    async function loadPoint() {
+      const response = await api.get(`/points/${routeParams.point_id}`);
+
       setData(response.data);
+    }
+
+    loadPoint();
+  }, []);
+
+  function handleNavigateBack() {
+    navigation.goBack();
+  }
+
+  function handleComposeMail() {
+    MailComposer.composeAsync({
+      subject: "Interesse na coleta de resíduos",
+      recipients: [data.point.email],
     });
-  }, [point_id]);
+  }
 
-  const handleWhatsapp = useCallback(() => {
-    if (data?.point?.whatsapp) {
-      Linking.openURL(
-        `whatsapp://send?phone=${data.point.whatsapp}&text="Tenho interesse sobre a coleta de resíduos"`,
-      );
-    }
-  }, [data]);
-
-  const handleComposeMail = useCallback(() => {
-    if (data.point.email) {
-      MailComposer.composeAsync({
-        subject: `Interesse na coleta de resíduos`,
-        recipients: [data.point.email],
-      });
-    }
-  }, [data]);
-
-  if (!data.point)
-    return (
-      <ActivityIndicator
-        color="#333"
-        style={{
-          flex: 1,
-          backgroundColor: '#fff',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      />
+  function handleWhatsApp() {
+    Linking.openURL(
+      `whatsapp://send?phone=${data.point.whatsapp}&text=Tenho interesse na coleta de resíduos`
     );
+  }
+  if (!data.point) {
+    return null;
+  }
 
   return (
-    <S.StyledSafeAreaView style={{ flex: 1 }}>
-      <S.Container>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={handleNavigateBack}>
           <Icon name="arrow-left" size={20} color="#34cb79" />
         </TouchableOpacity>
 
-        <S.PointImage
+        <Image
+          style={styles.pointImage}
           source={{
             uri: data.point.image_url,
           }}
         />
 
-        <S.PointName>{data.point.name}</S.PointName>
-        <S.PointItems>
-          {data.items.map(item => item.title).join(', ')}
-        </S.PointItems>
+        <Text style={styles.pointName}>{data.point.name}</Text>
+        <Text style={styles.pointItems}>
+          {data.items.map((item) => item.title).join(",")}
+        </Text>
 
-        <S.Address>
-          <S.AddressTitle>Endereço</S.AddressTitle>
-          <S.AddressContent>
+        <View style={styles.address}>
+          <Text style={styles.addressTitle}>Endereço</Text>
+          <Text style={styles.addressContent}>
             {data.point.city}, {data.point.uf}
-          </S.AddressContent>
-        </S.Address>
-      </S.Container>
-
-      <S.Footer>
-        <S.Button onPress={handleWhatsapp}>
+          </Text>
+        </View>
+      </View>
+      <View style={styles.footer}>
+        <RectButton style={styles.button} onPress={() => handleWhatsApp()}>
           <FontAwesome name="whatsapp" size={20} color="#fff" />
-          <S.ButtonText>Whatsapp</S.ButtonText>
-        </S.Button>
-        <S.Button onPress={handleComposeMail}>
+          <Text style={styles.buttonText}>Whatsapp</Text>
+        </RectButton>
+        <RectButton style={styles.button} onPress={() => handleComposeMail()}>
           <Icon name="mail" size={20} color="#fff" />
-          <S.ButtonText>E-mail</S.ButtonText>
-        </S.Button>
-      </S.Footer>
-    </S.StyledSafeAreaView>
+          <Text style={styles.buttonText}>E-mail</Text>
+        </RectButton>
+      </View>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 32,
+    paddingTop: 20,
+  },
+
+  pointImage: {
+    width: "100%",
+    height: 120,
+    resizeMode: "cover",
+    borderRadius: 10,
+    marginTop: 32,
+  },
+
+  pointName: {
+    color: "#34CB79",
+    fontSize: 28,
+    fontFamily: "Ubuntu_700Bold",
+    marginTop: 24,
+  },
+
+  pointItems: {
+    fontFamily: "Roboto_400Regular",
+    fontSize: 16,
+    lineHeight: 24,
+    marginTop: 8,
+    color: "#ffff",
+  },
+
+  address: {
+    marginTop: 32,
+  },
+
+  addressTitle: {
+    color: "#34CB79",
+    fontFamily: "Roboto_500Medium",
+    fontSize: 16,
+  },
+
+  addressContent: {
+    fontFamily: "Roboto_400Regular",
+    lineHeight: 24,
+    marginTop: 8,
+    color: "#fafafa",
+  },
+
+  footer: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: "#999",
+    paddingVertical: 20,
+    paddingHorizontal: 32,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  button: {
+    width: "48%",
+    backgroundColor: "#34CB79",
+    borderRadius: 10,
+    height: 50,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  buttonText: {
+    marginLeft: 8,
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "Roboto_500Medium",
+  },
+});
 
 export default Detail;

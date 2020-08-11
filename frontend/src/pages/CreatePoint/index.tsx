@@ -1,60 +1,59 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable no-use-before-define */
 import React, {
-  useEffect,
   useState,
-  useCallback,
+  useEffect,
   ChangeEvent,
   FormEvent,
-  useContext,
+  useCallback,
 } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
-import Toggle from 'react-toggle';
-import { ThemeContext } from 'styled-components';
-import { FaMoon, FaSun } from 'react-icons/fa';
 import { Map, TileLayer, Marker } from 'react-leaflet';
-import axios from 'axios';
 import { LeafletMouseEvent } from 'leaflet';
-
-import { useTheme } from '../../hooks/theme';
-import { useToast } from '../../hooks/toast';
+import { toast } from 'react-toastify';
+import api from '../../services/api';
+import ibge from '../../services/ibge';
 
 import Dropzone from '../../components/Dropzone';
-import api from '../../services/api';
+
+import './styles.css';
+
 import logo from '../../assets/logo.svg';
-import logoDark from '../../assets/logo-dark.svg';
 
-import { Container, Form, FieldGroup, ItemsList } from './styles';
-
-interface IItem {
-  id: string;
+interface Item {
+  id: number;
   title: string;
   image_url: string;
 }
 
-interface IPointItem {
-  item: {
-    id: string;
-  };
-}
-
-interface IIBGEResponse {
+interface IBGEUFResponse {
   sigla: string;
+  nome: string;
 }
 
-interface IIBGECityResponse {
+interface IBGECityResponse {
   nome: string;
 }
 
 const CreatePoint: React.FC = () => {
-  const history = useHistory();
-  const { id } = useParams();
-  const { addToast } = useToast();
-  const { title } = useContext(ThemeContext);
-  const { toggleTheme } = useTheme();
-  const [items, setItems] = useState<IItem[]>([]);
-  const [ufs, setUfs] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
+  const [ufs, setUfs] = useState<IBGEUFResponse[]>([]);
+  const [cities, setCities] = useState<IBGECityResponse[]>([]);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    whatsapp: '',
+  });
+
+  const [selectedFile, setSelectedFile] = useState<File>();
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [selectedUf, setSelectedUf] = useState<string>('0');
+  const [selectedCity, setSelectedCity] = useState<string>('0');
   const [selectedPosition, setSelectedPosition] = useState<[number, number]>([
     0,
     0,
@@ -64,124 +63,115 @@ const CreatePoint: React.FC = () => {
     0,
   ]);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    whatsapp: '',
-  });
+  const history = useHistory();
 
-  const [selectedUf, setSelectedUf] = useState('0');
-  const [selectedCity, setSelectedCity] = useState('0');
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File>();
-  const [preview, setPreview] = useState('');
+  // Get Current Position
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
 
-  const loadPoint = useCallback(async () => {
-    try {
-      const { data } = await api.get(`points/${id}`);
-      setSelectedCity(data.point.city);
-      setSelectedUf(data.point.uf);
-      setSelectedPosition([data.point.latitude, data.point.longitude]);
-      setFormData({
-        name: data.point.name,
-        email: data.point.email,
-        whatsapp: data.point.whatsapp,
-      });
-      setSelectedItems(
-        data.point.point_items.map(
-          (point_item: IPointItem) => point_item.item.id,
-        ),
+        setInitialPosition([latitude, longitude]);
+      },
+      () => {
+        toast.error('❌ Oops! Algo deu errado =/', toastOptions);
+      },
+      {
+        timeout: 30000,
+        enableHighAccuracy: true,
+      },
+    );
+  }, []);
+
+  // Load items
+  useEffect(() => {
+    async function loadItems() {
+      const response = await api.get('/items');
+
+      setItems(response.data);
+    }
+
+    loadItems();
+  }, []);
+
+  // Load UFs
+  useEffect(() => {
+    async function loadUfs() {
+      const response = await ibge.get<IBGEUFResponse[]>(
+        'localidades/estados?orderBy=nome',
       );
-      setPreview(data.point.image_url);
-    } catch (err) {
-      console.log(err);
-    }
-  }, [id]);
 
-  useEffect(() => {
-    if (id) {
-      loadPoint();
-    }
-  }, [id, loadPoint]);
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(position => {
-      const { latitude, longitude } = position.coords;
-
-      setInitialPosition([-21.6235108, -55.1598438]);
-    });
-  }, []);
-
-  useEffect(() => {
-    api.get('items').then(response => setItems(response.data));
-  }, []);
-
-  useEffect(() => {
-    if (selectedUf === '0') return;
-
-    axios
-      .get<IIBGECityResponse[]>(
-        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`,
-      )
-      .then(response => {
-        const cityNames = response.data.map(city => city.nome);
-
-        setCities(cityNames);
+      const ufInitials = response.data.map(uf => {
+        return {
+          sigla: uf.sigla,
+          nome: uf.nome,
+        };
       });
+
+      setUfs(ufInitials);
+    }
+
+    loadUfs();
+  }, []);
+
+  // Load Cities
+  useEffect(() => {
+    async function loadCities() {
+      if (selectedUf === '0') return;
+
+      const response = await ibge.get<IBGECityResponse[]>(
+        `localidades/estados/${selectedUf}/municipios`,
+      );
+
+      const cityNames = response.data.map(city => {
+        return { nome: city.nome };
+      });
+
+      setCities(cityNames);
+    }
+
+    loadCities();
   }, [selectedUf]);
 
-  useEffect(() => {
-    axios
-      .get<IIBGEResponse[]>(
-        'https://servicodados.ibge.gov.br/api/v1/localidades/estados',
-      )
-      .then(response => {
-        const ufInitials = response.data.map(uf => uf.sigla);
+  function handleSelectUf(event: ChangeEvent<HTMLSelectElement>) {
+    setSelectedUf(event.target.value);
+  }
 
-        setUfs(ufInitials);
-      });
-  }, []);
+  function handleSelectCity(event: ChangeEvent<HTMLSelectElement>) {
+    setSelectedCity(event.target.value);
+  }
 
-  const handleSelectUf = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      setSelectedUf(event.target.value);
-    },
-    [],
-  );
-
-  const handleSelectCity = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      setSelectedCity(event.target.value);
-    },
-    [],
-  );
-
-  const handleMapClick = useCallback((event: LeafletMouseEvent) => {
+  function handleMapClick(event: LeafletMouseEvent) {
     setSelectedPosition([event.latlng.lat, event.latlng.lng]);
-  }, []);
+  }
 
-  const handleInputChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = event.target;
+  function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
 
-      setFormData(oldData => ({
-        ...oldData,
-        [name]: value,
-      }));
-    },
-    [],
-  );
+    setFormData({ ...formData, [name]: value });
+  }
 
-  const handleSelectItem = useCallback(
-    (itemId: string) => {
-      const alreadySelected = selectedItems.findIndex(item => item === itemId);
+  function handleSelectItem(id: number) {
+    const alreadySelected = selectedItems.findIndex(item => item === id);
 
-      alreadySelected >= 0
-        ? setSelectedItems(oldItems => oldItems.filter(item => item !== itemId))
-        : setSelectedItems(oldItems => [...oldItems, itemId]);
-    },
-    [selectedItems],
-  );
+    if (alreadySelected >= 0) {
+      const filteredItems = selectedItems.filter(item => item !== id);
+
+      setSelectedItems(filteredItems);
+    } else {
+      setSelectedItems([...selectedItems, id]);
+    }
+  }
+
+  // Toastify configurations
+  const toastOptions = {
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  };
 
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
@@ -206,32 +196,12 @@ const CreatePoint: React.FC = () => {
           data.append('image', selectedFile);
         }
 
-        if (id) {
-          await api.put(`points/${id}`, data);
+        await api.post('points', data);
+        toast('✅ Criado com sucesso!', toastOptions);
 
-          addToast({
-            type: 'success',
-            title: 'Atualizado',
-            description: 'Ponto de coleta atualizado com sucesso.',
-          });
-        } else {
-          await api.post('points', data);
-
-          addToast({
-            type: 'success',
-            title: 'Cadastro realizado',
-            description: 'Ponto de coleta cadastrado com sucesso.',
-          });
-        }
-
-        history.push('/list-points');
+        history.push('/');
       } catch (err) {
-        addToast({
-          type: 'error',
-          title: 'Erro',
-          description:
-            ',Ocorreu um erro de comunicação com o servidor, tente novamente.',
-        });
+        toast.error('❌ Erro!', toastOptions);
       }
     },
     [
@@ -241,39 +211,28 @@ const CreatePoint: React.FC = () => {
       selectedPosition,
       selectedUf,
       history,
-      id,
       selectedFile,
-      addToast,
     ],
   );
 
   return (
-    <Container>
+    <div id="page-create-point">
       <header>
-        {title === 'light' ? (
-          <img src={logo} alt="Ecoleta" />
-        ) : (
-          <img src={logoDark} alt="Ecoleta" />
-        )}
-        <Toggle
-          checked={title === 'dark'}
-          onChange={toggleTheme}
-          className="toggle"
-          icons={{
-            checked: <FaMoon color="yellow" size={12} />,
-            unchecked: <FaSun color="yellow" size={12} />,
-          }}
-        />
-        <Link to="/list-points">
+        <img src={logo} alt="Ecoleta" />
+
+        <Link to="/">
           <FiArrowLeft />
-          Voltar para Dashboard
+          Voltar para home
         </Link>
       </header>
 
-      <Form onSubmit={handleSubmit}>
-        <h1>Cadastro do ponto de coleta</h1>
+      <form onSubmit={handleSubmit}>
+        <h1>
+          Cadastro do
+          <br /> ponto de coleta
+        </h1>
 
-        <Dropzone preview={preview} onFileUploaded={setSelectedFile} />
+        <Dropzone onFileUploaded={setSelectedFile} />
 
         <fieldset>
           <legend>
@@ -283,39 +242,34 @@ const CreatePoint: React.FC = () => {
           <div className="field">
             <label htmlFor="name">Nome da entidade</label>
             <input
-              value={formData.name}
+              onChange={handleInputChange}
               type="text"
               name="name"
               id="name"
-              onChange={handleInputChange}
             />
           </div>
 
-          <FieldGroup>
+          <div className="field-group">
             <div className="field">
               <label htmlFor="email">E-mail</label>
               <input
-                value={formData.email}
-                type="email"
+                onChange={handleInputChange}
+                type="text"
                 name="email"
                 id="email"
-                onChange={handleInputChange}
               />
             </div>
-          </FieldGroup>
 
-          <FieldGroup>
             <div className="field">
               <label htmlFor="whatsapp">Whatsapp</label>
               <input
-                value={formData.whatsapp}
+                onChange={handleInputChange}
                 type="text"
                 name="whatsapp"
                 id="whatsapp"
-                onChange={handleInputChange}
               />
             </div>
-          </FieldGroup>
+          </div>
         </fieldset>
 
         <fieldset>
@@ -329,71 +283,61 @@ const CreatePoint: React.FC = () => {
               attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-
             <Marker position={selectedPosition} />
           </Map>
 
-          <FieldGroup>
+          <div className="field-group">
             <div className="field">
               <label htmlFor="uf">Estado (UF)</label>
-              <select
-                value={selectedUf}
-                name="uf"
-                id="uf"
-                onChange={handleSelectUf}
-              >
-                <option value="0">Selecione um UF</option>
+
+              <select onChange={handleSelectUf} name="uf" id="uf">
+                <option value="0">Selecione uma UF</option>
                 {ufs?.map(uf => (
-                  <option key={uf} value={uf}>
-                    {uf}
+                  <option key={uf.nome} value={uf.sigla}>
+                    {uf.sigla}
                   </option>
                 ))}
               </select>
             </div>
+
             <div className="field">
               <label htmlFor="city">Cidade</label>
-              <select
-                value={selectedCity}
-                name="city"
-                id="city"
-                onChange={handleSelectCity}
-              >
-                <option value="0">Selecione um cidade</option>
-                {cities?.map(city => (
-                  <option key={city} value={city}>
-                    {city}
+              <select onChange={handleSelectCity} name="city" id="city">
+                <option value="0">Selecione uma cidade</option>
+
+                {cities.map(city => (
+                  <option key={city.nome} value={city.nome}>
+                    {city.nome}
                   </option>
                 ))}
               </select>
             </div>
-          </FieldGroup>
+          </div>
         </fieldset>
 
         <fieldset>
           <legend>
-            <h2>Ítens de coleta</h2>
-            <span>Selecione um ou mais ítens abaixo</span>
+            <h2>Itens de coleta</h2>
+            <span>Selecione um ou mais itens abaixo</span>
           </legend>
 
-          <ItemsList>
-            {items?.map((item: IItem) => (
-              <li key={item.id}>
-                <button
-                  className={selectedItems.includes(item.id) ? 'selected' : ''}
-                  type="button"
-                  onClick={() => handleSelectItem(item.id)}
-                >
-                  <img src={item.image_url} alt={item.title} />
-                  <span>{item.title}</span>
-                </button>
+          <ul className="items-grid">
+            {items.map(item => (
+              <li
+                key={item.id}
+                onClick={() => handleSelectItem(item.id)}
+                className={selectedItems.includes(item.id) ? 'selected' : ''}
+              >
+                <img src={item.image_url} alt={item.title} />
+                <span>{item.title}</span>
               </li>
             ))}
-          </ItemsList>
+          </ul>
         </fieldset>
 
-        <button type="submit">Cadastrar ponto de coleta</button>
-      </Form>
-    </Container>
+        <button type="submit">Cadastrar novo ponto de coleta</button>
+      </form>
+    </div>
   );
 };
 

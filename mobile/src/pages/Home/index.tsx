@@ -1,169 +1,156 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { KeyboardAvoidingView, Platform, View } from 'react-native';
-import { Feather as Icon, FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { ThemeContext } from 'styled-components';
-import RNPickerSelect from 'react-native-picker-select';
-import axios from 'axios';
-
-import { useTheme } from '../../hooks/theme';
-
+import React, { useState } from "react";
+import { Feather as Icon } from "@expo/vector-icons";
 import {
-  Container,
-  Logo,
-  LogoTitle,
-  Main,
-  Title,
-  Description,
-  Footer,
-  Button,
-  IconView,
-  ButtonText,
-  ToggleThemeButton,
-  ThemeIcon,
-} from './styles';
+  View,
+  ImageBackground,
+  StyleSheet,
+  Image,
+  Text,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-interface IIBGEResponse {
-  sigla: string;
-}
-
-interface IIBGECityResponse {
-  nome: string;
-}
+import { RectButton } from "react-native-gesture-handler";
 
 const Home: React.FC = () => {
-  const { title, colors } = useContext(ThemeContext);
-  const { toggleTheme } = useTheme();
-  const [ufs, setUfs] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
-  const [selectedUf, setSelectedUf] = useState('0');
-  const [selectedCity, setSelectedCity] = useState('0');
+  const [uf, setUf] = useState("");
+  const [city, setCity] = useState("");
+
   const navigation = useNavigation();
 
-  const pickerSelectStyles = {
-    inputAndroid: {
-      height: 60,
-      backgroundColor: colors.cardBackground,
-      borderRadius: 10,
-      marginBottom: 8,
-      paddingHorizontal: 24,
-      fontSize: 16,
-      color: colors.text,
-    },
-    inputIOS: {
-      height: 60,
-      backgroundColor: colors.cardBackground,
-      borderRadius: 10,
-      marginBottom: 8,
-      paddingHorizontal: 24,
-      fontSize: 16,
-      color: colors.text,
-    },
-    placeholder: { color: colors.placeholder },
-  };
-
-  useEffect(() => {
-    if (selectedUf === '0') return;
-
-    axios
-      .get<IIBGECityResponse[]>(
-        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`,
-      )
-      .then(response => {
-        const cityNames = response.data.map(city => city.nome);
-
-        setCities(cityNames);
-      });
-  }, [selectedUf]);
-
-  useEffect(() => {
-    axios
-      .get<IIBGEResponse[]>(
-        'https://servicodados.ibge.gov.br/api/v1/localidades/estados',
-      )
-      .then(response => {
-        const ufInitials = response.data.map(uf => uf.sigla);
-
-        setUfs(ufInitials);
-      });
-  }, []);
+  function handleNavigateToPoints() {
+    navigation.navigate("Points", {
+      uf,
+      city,
+    });
+  }
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Container
+      <ImageBackground
+        source={require("../../assets/home-background.png")}
+        style={styles.container}
         imageStyle={{
           width: 274,
           height: 368,
-          tintColor: title === 'light' ? 'green' : '#f5f5f5',
-          opacity: 0.2,
         }}
-        // eslint-disable-next-line global-require
-        source={require('../../assets/home-background.png')}
       >
-        <Main>
-          <Logo>
-            <FontAwesome name="recycle" size={50} color="#34cb79" />
-            <LogoTitle>Ecoleta</LogoTitle>
-          </Logo>
-          <ToggleThemeButton onPress={toggleTheme}>
-            <ThemeIcon name={title === 'light' ? 'sun' : 'moon'} />
-          </ToggleThemeButton>
+        <View style={styles.main}>
+          <Image source={require("../../assets/logo.png")} />
           <View>
-            <Title>Seu marketplace de coleta de resíduos</Title>
-            <Description>
+            <Text style={styles.title}>
+              Seu marketplace de coleta de resíduos
+            </Text>
+            <Text style={styles.description}>
               Ajudamos pessoas a encontrarem pontos de coleta de forma
               eficiente.
-            </Description>
+            </Text>
           </View>
-        </Main>
-
-        <Footer>
-          <RNPickerSelect
-            placeholder={{
-              color: colors.placeholder,
-              label: 'Selecione a UF',
-            }}
-            value={selectedUf}
-            style={pickerSelectStyles}
-            useNativeAndroidPickerStyle={false}
-            onValueChange={setSelectedUf}
-            items={ufs?.map(uf => ({
-              label: uf,
-              value: uf,
-            }))}
+        </View>
+        <View style={styles.footer}>
+          <TextInput
+            style={styles.input}
+            value={uf}
+            onChangeText={setUf}
+            maxLength={2}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            placeholder="Digite a UF"
           />
-          <RNPickerSelect
-            placeholder={{
-              label: 'Selecione a Cidade',
-            }}
-            value={selectedCity}
-            style={pickerSelectStyles}
-            useNativeAndroidPickerStyle={false}
-            onValueChange={setSelectedCity}
-            items={cities?.map(city => ({
-              label: city,
-              value: city,
-            }))}
+          <TextInput
+            style={styles.input}
+            placeholder="Digite a cidade"
+            value={city}
+            autoCorrect={false}
+            onChangeText={setCity}
           />
-          <Button
-            onPress={() =>
-              navigation.navigate('Points', {
-                uf: selectedUf,
-                city: selectedCity,
-              })}
+          <RectButton
+            style={styles.button}
+            onPress={() => handleNavigateToPoints()}
           >
-            <IconView>
+            <View style={styles.buttonIcon}>
               <Icon name="arrow-right" color="#fff" size={24} />
-            </IconView>
-            <ButtonText>Entrar</ButtonText>
-          </Button>
-        </Footer>
-      </Container>
+            </View>
+            <Text style={styles.buttonText}>Entrar</Text>
+          </RectButton>
+        </View>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 32,
+  },
+
+  main: {
+    flex: 1,
+    justifyContent: "center",
+  },
+
+  title: {
+    color: "#7a33cc",
+    fontSize: 32,
+    fontFamily: "Ubuntu_700Bold",
+    maxWidth: 260,
+    marginTop: 64,
+  },
+
+  description: {
+    color: "#6C6C80",
+    fontSize: 16,
+    marginTop: 16,
+    fontFamily: "Roboto_400Regular",
+    maxWidth: 260,
+    lineHeight: 24,
+  },
+
+  footer: {},
+
+  select: {},
+
+  input: {
+    height: 60,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    marginBottom: 8,
+    paddingHorizontal: 24,
+    fontSize: 16,
+  },
+
+  button: {
+    backgroundColor: "#34CB79",
+    height: 60,
+    flexDirection: "row",
+    borderRadius: 10,
+    overflow: "hidden",
+    alignItems: "center",
+    marginTop: 8,
+  },
+
+  buttonIcon: {
+    height: 60,
+    width: 60,
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  buttonText: {
+    flex: 1,
+    justifyContent: "center",
+    textAlign: "center",
+    color: "#FFF",
+    fontFamily: "Roboto_500Medium",
+    fontSize: 16,
+  },
+});
 
 export default Home;

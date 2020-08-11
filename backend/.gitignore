@@ -1,7 +1,7 @@
 node_modules
-.vscode
-ormconfig.json
-
 uploads/*
 !uploads/.gitkeep
-!photos/.gitkeep
+
+*.sqlite
+
+!uploads/*.svg
