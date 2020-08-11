@@ -1,148 +1,113 @@
-<h2 align="center">
-   ♻️ NextLevelWeek 1.0 ♻️
-</h2>
+<h3 align="center">
+    <img alt="Logo" title="#logo" width="300px" src=".github/logo.png">
+    <br><br>
+    <b>Ecoleta!</b>  
+    <br>
+</h3>
 
 <p align="center">
-  <a href="#computer-project">Project</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#rocket-built-with">Built with</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#information_source-how-to-run">How to run</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  </p>
+  <a href="https://rocketseat.com.br">
+    <img alt="Made by Rocketseat" src="https://img.shields.io/badge/made%20by-Rocketseat-%237519C1">
+  </a>
+</p>
 
-## :computer: Project 
+# Índice
 
- Ecoleta is an application that aims to help people find places that collect specific types of waste, encouraging people to recycle more.
+- [Sobre](#sobre)
+- [Documentação](#documentacao)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Como Usar](#como-usar)
+- [Como Contribuir](#como-contribuir)
 
-## :rocket: Built with
+<a id="sobre"></a>
 
-This project was developed with the following technologies:
+## :bookmark: Sobre
 
-<details>
-  <summary>Backend</summary>
+O <strong>Ecoleta</strong> é uma aplicação Web e Mobile para ajudar pessoas a encontrarem pontos de coleta para reciclagem.
 
--   [Node.js](https://nodejs.org/)
--   [Express](https://expressjs.com/)
--   [TypeORM](https://typeorm.io/)
--   [Typescript](https://www.typescriptlang.org/)
--   [TS-Node-Dev](https://www.npmjs.com/package/ts-node-dev)
--   [Celebrate](https://github.com/arb/celebrate)
--   [Tsyringe](https://github.com/microsoft/tsyringe)
--   [uuidv4](https://www.npmjs.com/package/uuidv4)
--   [Cors](https://www.npmjs.com/package/cors)
--   [ESLint](https://eslint.org/)
--   [Prettier](https://prettier.io/)
--   [VS Code](https://code.visualstudio.com/)
+Essa aplicação foi construída na trilha <strong>Booster</strong> da <strong>Next Level Week</strong> distribuída pela [Rocketseat](https://rocketseat.com.br/). A ideia de criar uma aplicação voltada ao meio ambiente surgiu da coincidência da data do curso e a data da <strong>semana do meio ambiente</strong>
 
-</details>
+<a id="documentacao"></a>
 
-<details>
-  <summary>Frontend</summary>
+## :books: Documentação
 
--   [React](https://pt-br.reactjs.org/)
--   [Typescript](https://www.typescriptlang.org/)
--   [Styled Components](https://styled-components.com/)
--   [Context API](https://reactjs.org/docs/context.html)
--   [React-toggle](https://github.com/aaronshaf/react-toggle)
--   [React-spring](https://www.react-spring.io/)
--   [uuidv4](https://www.npmjs.com/package/uuidv4)
--   [Axios](https://www.npmjs.com/package/axios)
--   [React Dropzone](https://github.com/react-dropzone/react-dropzone)
--   [React Icons](https://react-icons.netlify.com/#/)
--   [Leaflet](https://leafletjs.com/)
--   [React Leaflet](https://react-leaflet.js.org/)
--   [ESLint](https://eslint.org/)
--   [Prettier](https://prettier.io/)
--   [VS Code](https://code.visualstudio.com/)
+Para reforçar alguns conceitos e registrar comandos que são dificeis de se lembrar eu fiz uma pequena **[DOCUMENTAÇÃO](DOCUMENTATION.md)** para ajudar quem esta iniciando com **TypeScript**, **Node**, **ReactJS** e **React Native**.
 
-</details>
+<a id="tecnologias-utilizadas"></a>
 
-<details>
-  <summary>Mobile</summary>
+## :rocket: Tecnologias Utilizadas
 
--   [React](https://pt-br.reactjs.org/)
--   [React Native](https://reactnative.dev/)
--   [Expo](https://expo.io/learn)
--   [Styled Components](https://styled-components.com/)
--   [Typescript](https://www.typescriptlang.org/)
--   [React Navigation](https://reactnavigation.org/)
--   [Axios](https://www.npmjs.com/package/axios)
--   [Expo Google Fonts](https://github.com/expo/google-fonts)
--   [Expo Location](https://docs.expo.io/versions/latest/sdk/location/)
--   [Expo Mail Composer](https://docs.expo.io/versions/latest/sdk/mail-composer/)
--   [React Native Appearance](https://github.com/expo/react-native-appearance)
--   [React Native Picker Select](https://www.npmjs.com/package/react-native-picker-select)
--   [ESLint](https://eslint.org/)
--   [Prettier](https://prettier.io/)
--   [VS Code](https://code.visualstudio.com/)
+O projeto foi desenvolvido utilizando as seguintes tecnologias
 
-</details>
+- [TypeScript](https://www.typescriptlang.org/)
+- [Node.js](https://nodejs.org/en/)
+- [ReactJS](https://reactjs.org/)
+- [React Native](https://reactnative.dev/)
 
-## :information_source: How to run
+## :heavy_check_mark: :computer: Resultado Web
 
-### Requirements
+- O layout está disponível no **[Figma](https://www.figma.com/file/1SxgOMojOB2zYT0Mdk28lB/)**;
 
-To run the application you will need:
-* [Git](https://git-scm.com)
-* [Node](https://nodejs.org/)
-* [Yarn](https://yarnpkg.com/) 
+<h1 align="center">
+    <img alt="Web" src=".github/Video.gif" width="900px">
+</h1>
 
-I strongly recommend using [Docker](https://www.docker.com/) to run the databases.
-<br>
-If you decide to use docker, follow this steps to install and run the docker image.
+## :heavy_check_mark: :iphone: Resultado Mobile
 
-```bash
-# install Postgres image (if you don't specify an username it will be postgres by default)
-$ docker run --name imagename -e POSTGRES_PASSWORD=yourPassword -p 5432:5432 -d postgres
+<h1 align="center">
+    <img alt="Mobile Home" src=".github/Home.png" width="300px">
+    <img alt="Mobile Detail" src=".github/Detail.svg" width="300px">
+</h1>
 
-# start Postgres
-$ docker start imageName
+<a id="como-usar"></a>
 
-```
-### Backend
-Now clone the repository and install the dependencies.
-```bash
-# to clone the repository
+## :fire: Como usar
 
-# go into the backend folder
-$ cd ecoleta/backend
+- ### **Pré-requisitos**
 
-#install the backend dependencies
-$ yarn
+  - É **necessário** possuir o **[Node.js](https://nodejs.org/en/)** instalado na máquina
+  - Também, é **preciso** ter um gerenciador de pacotes seja o **[NPM](https://www.npmjs.com/)** ou **[Yarn](https://yarnpkg.com/)**.
+  - Por fim, é **essencial** ter o **[Expo](https://expo.io/)** instalado de forma global na máquina
 
-```
-In order to connect to the database, you will need to enter the access informations into a ormconfig.json. You can find more about it [here](https://typeorm.io/#/using-ormconfig).
+1. Faça um clone :
 
-```bash
-# run migrations
-$ yarn typeorm migration:run
-
-# run api
-$ yarn dev:server
+```sh
+  $ git clone https://github.com/lhcbernardes/NLW1-Ecoleta.git
 ```
 
-### Frontend
+2. Executando a Aplicação:
 
-```bash
-# in another tab of the terminal install the frontend dependencies and run it 
-$ cd frontend
-$ yarn
-$ yarn start
+```sh
+  # Instale as dependências
+  $ yarn
+
+  ## Crie o banco de dados
+  $ cd server
+  $ yarn run knex:migrate
+  $ yarn run knex:seed
+
+  # Inicie a API
+  $ yarn run dev
+
+  # Inicie a aplicação web
+  $ cd web
+  $ yarn start
+
+  # Inicie a aplicação mobile
+  $ cd mobile
+  $ yarn start
 ```
 
-### Mobile
+<a id="como-contribuir"></a>
 
-The Application was developed using Expo. It is a free and open source toolchain built around React Native to facilitate the process of running and testing applications. [Click here](https://expo.io/learn) to get start with Expo.
+## :recycle: Como contribuir
 
-```bash
-# install the dependencies
-cd mobile
-yarn
-```
-```bash
+- Faça um Fork desse repositório,
+- Crie uma branch com a sua feature: `git checkout -b my-feature`
+- Commit suas mudanças: `git commit -m 'feat: My new feature'`
+- Push a sua branch: `git push origin my-feature`
 
-# to run the app
-yarn start
+## :mortar_board: Quem ministrou?
 
-```
-Expo will open a page in your browser, scan the QRcode on the page and wait for the app to load.
+As aulas foram ministradas pelo mestre **[Diego Fernandes](https://github.com/diego3g)** nas aulas da **Next Level Week**.
 
-> The Application was developed and tested on Iphone 6s and Android Studio Emulator.
