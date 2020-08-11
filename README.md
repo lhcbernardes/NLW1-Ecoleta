@@ -1,6 +1,4 @@
 <h3 align="center">
-    <img alt="Logo" title="#logo" width="300px" src=".github/logo.png">
-    <br><br>
     <b>Ecoleta!</b>  
     <br>
 </h3>
